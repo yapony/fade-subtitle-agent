@@ -1,8 +1,26 @@
-import json, unittest
+import json, shutil, tempfile, unittest
 from pathlib import Path
+from unittest.mock import patch
+
+from fade_content_agent import schema_validation
 
 class SchemaContractTests(unittest.TestCase):
     def read(self,name): return json.loads((Path(__file__).parents[1]/'schemas'/f'{name}.schema.json').read_text())
+
+    def test_installed_package_loads_schema_files_beside_module(self):
+        with tempfile.TemporaryDirectory() as directory:
+            package_dir = Path(directory) / 'site-packages' / 'fade_content_agent'
+            packaged_schemas = package_dir / 'schemas'
+            packaged_schemas.mkdir(parents=True)
+            source_schemas = Path(__file__).parents[1] / 'schemas'
+            for schema in source_schemas.glob('*.schema.json'):
+                shutil.copy(schema, packaged_schemas / schema.name)
+
+            with patch.object(schema_validation, '__file__', str(package_dir / 'schema_validation.py')):
+                errors = schema_validation.validate_schemas({})
+
+        self.assertFalse(any(error.startswith('cannot load ') for error in errors))
+
     def test_schema_version_two_and_concept_contract(self):
         subtitles=self.read('subtitles'); vocabulary=self.read('vocabulary'); quizzes=self.read('quizzes'); culture=self.read('culture')
         self.assertEqual(subtitles['properties']['schema_version']['const'],'2.0.0')

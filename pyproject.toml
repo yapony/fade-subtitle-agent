@@ -16,4 +16,4 @@ test = ["pytest>=8.0"]
 fade-content-agent = "fade_content_agent.cli:main"
 
 [tool.setuptools.package-data]
-fade_content_agent = ["prompts/*.md"]
+fade_content_agent = ["prompts/*.md", "schemas/*.json"]

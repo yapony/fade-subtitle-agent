@@ -16,7 +16,14 @@ _SCHEMA_FILES = {
 
 def validate_schemas(package: dict, schema_dir: str | Path | None = None) -> list[str]:
     """Return readable schema violations for the package's five JSON documents."""
-    root=Path(schema_dir) if schema_dir else Path(__file__).resolve().parents[2]/'schemas'
+    package_schema_dir = Path(__file__).resolve().parent / 'schemas'
+    source_schema_dir = Path(__file__).resolve().parents[2] / 'schemas'
+    if schema_dir:
+        root = Path(schema_dir)
+    elif package_schema_dir.is_dir():
+        root = package_schema_dir
+    else:
+        root = source_schema_dir
     errors=[]
     for document,filename in _SCHEMA_FILES.items():
         schema_path=root/filename
