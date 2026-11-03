@@ -1,0 +1,1 @@
+Spanish-specific analysis: review reusable constructions such as gustar with its indirect object, tener que + infinitive, ser/estar contrasts, and productive tense/aspect patterns. Treat clitic combinations and common inflections as grammar only when they teach a reusable point; do not annotate routine function words independently without learning value.

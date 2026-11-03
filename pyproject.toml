@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fade-content-agent"
+version = "0.1.0"
+description = "Gemini-powered subtitle learning content pipeline"
+requires-python = ">=3.12"
+dependencies = ["google-genai>=1.0.0", "pydantic>=2.7", "python-dotenv>=1.0", "jsonschema>=4.22"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+fade-content-agent = "fade_content_agent.cli:main"
+
+[tool.setuptools.package-data]
+fade_content_agent = ["prompts/*.md"]

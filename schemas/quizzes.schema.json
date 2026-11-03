@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quizzes.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {"const": "2.0.0"},
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {"type": "string"},
+          "target_time": {"type": "number", "minimum": 0},
+          "trigger_time": {"type": "number", "minimum": 0},
+          "reason": {"enum": ["sentence_boundary", "forced_interval"]},
+          "interrupts_sentence": {"type": "boolean"},
+          "is_final": {"const": false},
+          "question_ids": {"type": "array", "items": {"type": "string"}}
+        },
+        "required": ["id", "target_time", "trigger_time", "reason", "interrupts_sentence", "is_final", "question_ids"],
+        "additionalProperties": true
+      }
+    },
+    "questions": {"type": "array", "items": {"$ref": "#/$defs/checkpointQuestion"}},
+    "quiz_warnings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "reason": {"type": "string"},
+          "question_id": {"type": "string"},
+          "question_type": {"type": "string"},
+          "sentence_ids": {"type": "array", "items": {"type": "string"}},
+          "concept_lemma": {"type": "string"},
+          "concept_meaning": {"type": "string"},
+          "candidate_concept_ids": {"type": "array", "items": {"type": "string"}},
+          "detail": {"type": "string"}
+        },
+        "required": ["reason", "question_id", "detail"],
+        "additionalProperties": true
+      }
+    },
+    "final_quiz": {
+      "type": "object",
+      "properties": {
+        "id": {"const": "final"},
+        "trigger_time": {"type": "number", "minimum": 0},
+        "question_ids": {"type": "array", "items": {"type": "string"}},
+        "questions": {"type": "array", "items": {"$ref": "#/$defs/finalQuestion"}}
+      },
+      "required": ["id", "trigger_time", "question_ids", "questions"],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "checkpoint_id": {"type": "string"},
+        "question_type": {"enum": ["content_comprehension", "vocabulary_recognition", "expression_recognition", "grammar_understanding"]},
+        "category": {"type": "string"},
+        "prompt": {"type": "string"},
+        "options": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "string"}},
+        "correct_answer_index": {"type": "integer", "minimum": 0, "maximum": 3},
+        "explanation": {"type": "string"},
+        "sentence_ids": {"type": "array", "items": {"type": "string"}},
+        "concept_ids": {"type": "array", "items": {"type": "string"}},
+        "evidence": {"type": "string"},
+        "evidence_sentence_id": {"type": "string"}
+      },
+      "required": ["id", "question_type", "category", "prompt", "options", "correct_answer_index", "explanation", "sentence_ids", "concept_ids", "evidence", "evidence_sentence_id"],
+      "additionalProperties": true
+    },
+    "checkpointQuestion": {
+      "allOf": [
+        {"$ref": "#/$defs/question"},
+        {"type": "object", "required": ["checkpoint_id"]}
+      ]
+    },
+    "finalQuestion": {
+      "allOf": [
+        {"$ref": "#/$defs/question"},
+        {"not": {"required": ["checkpoint_id"]}}
+      ]
+    }
+  },
+  "required": ["schema_version", "checkpoints", "questions", "final_quiz"],
+  "additionalProperties": true
+}

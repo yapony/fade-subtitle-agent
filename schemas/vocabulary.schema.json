@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "vocabulary.schema.json",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "2.0.0"
+    },
+    "concepts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "concept_id": {
+            "type": "string"
+          },
+          "lemma": {
+            "type": "string"
+          },
+          "meaning_key": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "noun",
+              "verb",
+              "adjective",
+              "adverb",
+              "fixed_expression",
+              "idiom",
+              "collocation",
+              "grammar_pattern",
+              "other"
+            ]
+          },
+          "frequency": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "difficulty": {
+            "type": "integer",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "translation": {
+            "type": "string"
+          },
+          "explanation": {
+            "type": "string"
+          },
+          "selection_priority": {
+            "enum": ["high", "medium", "low"]
+          },
+          "selection_reason": {
+            "type": "string"
+          },
+          "occurrence_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "surface_forms": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "concept_id",
+          "lemma",
+          "meaning_key",
+          "category",
+          "frequency",
+          "difficulty",
+          "translation",
+          "explanation",
+          "occurrence_ids",
+          "surface_forms"
+        ],
+        "additionalProperties": true
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "concepts"
+  ],
+  "additionalProperties": true
+}
