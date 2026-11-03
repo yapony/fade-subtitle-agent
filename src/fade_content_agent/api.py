@@ -6,6 +6,7 @@ package after the worker finishes.
 """
 from __future__ import annotations
 
+import hmac
 import json
 import os
 import secrets
@@ -16,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Header, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -102,8 +103,17 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=False,
     allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+
+def require_api_key(authorization: str | None = Header(default=None)) -> None:
+    expected = os.getenv("FADE_AGENT_API_KEY", "")
+    if not expected:
+        raise HTTPException(status_code=503, detail="Agent API authentication is not configured")
+    scheme, separator, supplied = (authorization or "").partition(" ")
+    if not separator or scheme.lower() != "bearer" or not hmac.compare_digest(supplied, expected):
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 
 @app.get("/health")
@@ -111,7 +121,7 @@ def health() -> dict[str, str]:
     return {"status": "ok"}
 
 
-@app.post("/analyses", status_code=202)
+@app.post("/analyses", status_code=202, dependencies=[Depends(require_api_key)])
 def create_analysis(request: AnalysisRequest) -> dict[str, str]:
     if not is_youtube_input(request.youtube_url.strip()):
         raise HTTPException(status_code=400, detail="youtube_url must be a valid YouTube URL or video id")
@@ -125,7 +135,7 @@ def create_analysis(request: AnalysisRequest) -> dict[str, str]:
     return {"analysis_id": job_id}
 
 
-@app.get("/analyses/{analysis_id}")
+@app.get("/analyses/{analysis_id}", dependencies=[Depends(require_api_key)])
 def get_analysis(analysis_id: str) -> dict[str, Any]:
     with jobs_lock:
         job = jobs.get(analysis_id)
@@ -134,7 +144,7 @@ def get_analysis(analysis_id: str) -> dict[str, Any]:
         return _job_snapshot(job)
 
 
-@app.get("/analyses/{analysis_id}/result")
+@app.get("/analyses/{analysis_id}/result", dependencies=[Depends(require_api_key)])
 def get_result(analysis_id: str) -> dict[str, Any]:
     with jobs_lock:
         job = jobs.get(analysis_id)

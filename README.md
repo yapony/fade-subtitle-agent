@@ -20,6 +20,10 @@ Set `GEMINI_API_KEY` and optionally `GEMINI_MODEL` (`gemini-3.5-flash-lite` by d
 The optional API wraps the existing synchronous pipeline in an asynchronous
 job interface. Keep `GEMINI_API_KEY` and `TRANSCRIPT_API_KEY` on the server;
 the browser only receives an analysis id and the completed schema 2.0 package.
+Set `FADE_AGENT_API_KEY` on the API host. All analysis, polling, and result
+routes require this value as a Bearer token; `/health` remains public for
+platform health checks. Configure the same value only in the protected
+frontend's server-side proxy, never in browser code or an unrestricted frontend.
 
 ```sh
 uvicorn fade_content_agent.api:app --host 0.0.0.0 --port 8080
